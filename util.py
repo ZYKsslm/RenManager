@@ -125,8 +125,8 @@ class Render:
         )
         table.add_column("环境名称", style="orange3", justify="center", vertical="middle")
         table.add_column("环境版本", style="magenta", justify="center", vertical="middle")
-        for n, v in env.items():
-            table.add_row(n, v)
+        for n, d in env.items():
+            table.add_row(n, d["version"])
 
         return table
 
