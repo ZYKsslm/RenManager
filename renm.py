@@ -58,7 +58,7 @@ class RenManagerApp(cmd2.Cmd):
         if self.env != RenManagerApp.ENV:
             self.console.log("请先退出环境", style="yellow3")
             return
-        
+
         env_name: str = arg.name
         sdk_version: str = arg.version
         pre_release: bool = arg.pre_release
@@ -88,7 +88,7 @@ class RenManagerApp(cmd2.Cmd):
         if self.env != RenManagerApp.ENV:
             self.console.log("请先退出环境", style="yellow3")
             return
-        
+
         env = arg.name
         if env not in self.env_dict:
             self.console.log(f"未找到环境 [bold italic cyan]{env}", style="red")
@@ -105,12 +105,12 @@ class RenManagerApp(cmd2.Cmd):
 
     @cmd2.with_argparser(Parser.rename_parser())
     def do_rename(self, arg):
-        old_name = arg.old_name
-        new_name = arg.new_name
-
         if self.env != RenManagerApp.ENV:
             self.console.log("请先退出环境", style="yellow3")
             return
+
+        old_name = arg.old_name
+        new_name = arg.new_name
 
         if old_name not in self.env_dict:
             self.console.log(f"未找到环境 [bold italic cyan]{old_name} ", style="red")
@@ -124,6 +124,10 @@ class RenManagerApp(cmd2.Cmd):
         if res:
             os.rename(f"./env/{old_name}", f"./env/{new_name}")
             self.env_dict[new_name] = self.env_dict.pop(old_name)
+            self.env_dict[new_name]["hash"] = {file_name.replace(old_name, new_name): hash_data for file_name, hash_data in self.env_dict[new_name]["hash"].items()}
+            installer = Installer(self.console, new_name, None, None)
+            hash_data = installer.hash()
+            self.env_dict[new_name]["hash"] = hash_data
             self.update_env()
             self.console.log(
                 f"已将环境 [bold italic cyan]{old_name}[/bold italic cyan] 重命名为 "
@@ -214,6 +218,21 @@ class RenManagerApp(cmd2.Cmd):
             self.env_dict[self.env]["hash"] = hash_data
             self.update_env()
             self.console.log("已重置当前环境文件哈希值", style="green")
+        else:
+            self.console.log("已取消操作", style="yellow3")
+
+    def do_reset(self, arg):
+        if self.env != RenManagerApp.ENV:
+            self.console.log("请先退出环境", style="yellow3")
+            return
+
+        res = Confirm.ask("[bold red]确定要[underline]重置 RenManager [/underline]吗？这会导致删除所有的环境！[/bold red]")
+        if res and self.console.input("[bold red]请输入 [italic]RenManager[/italic] 来继续：\n[/bold red]") == "RenManager":
+            for env in self.env_dict.keys():
+                shutil.rmtree(f"./env/{env}")
+                del self.env_dict[env]
+            self.update_env()
+            self.console.log("已重置", style="green")
         else:
             self.console.log("已取消操作", style="yellow3")
 
