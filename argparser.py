@@ -52,6 +52,7 @@ class Parser:
         parser = Cmd2ArgumentParser()
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument("-l", "--launcher", action="store_true", help="打开启动器")
+        group.add_argument("-vsc", "--vscode", action="store_true", help="使用 vscode 打开 Ren'Py 源码目录")
         group.add_argument("-c", "--command", type=str, help="使用 Ren'Py 命令 需要使用引号包裹")
 
         return parser

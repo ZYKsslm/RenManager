@@ -161,6 +161,9 @@ class RenManagerApp(cmd2.Cmd):
                 rp = [os.path.join(self.sdk_path, "renpy.sh")]
 
             subprocess.run(rp + args, stdout=subprocess.PIPE)
+        
+        elif arg.vscode:
+            os.system(f"code {os.path.join(self.sdk_path, "renpy")}")
 
     def do_check(self, arg):
         if self.env == RenManagerApp.ENV:
