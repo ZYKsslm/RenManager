@@ -132,7 +132,11 @@ class RenManagerApp(cmd2.Cmd):
 
     @cmd2.with_argparser(Parser.activate_parser())
     def do_activate(self, arg):
-        self.env = arg.name
+        env_name = arg.name
+        if env_name in self.env_dict:
+            self.env = env_name
+        else:
+            self.console.log(f"没有名为 [orange3]{env_name}[/orange3] 的环境", style="yellow3")
 
     def do_deactivate(self, arg):
         self.env = RenManagerApp.ENV
