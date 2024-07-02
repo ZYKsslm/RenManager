@@ -55,6 +55,10 @@ class RenManagerApp(cmd2.Cmd):
 
     @cmd2.with_argparser(Parser.create_parser())
     def do_create(self, arg):
+        if self.env != RenManagerApp.ENV:
+            self.console.log("请先退出环境", style="yellow3")
+            return
+        
         env_name: str = arg.name
         sdk_version: str = arg.version
         pre_release: bool = arg.pre_release
@@ -81,6 +85,10 @@ class RenManagerApp(cmd2.Cmd):
 
     @cmd2.with_argparser(Parser.remove_parser())
     def do_remove(self, arg):
+        if self.env != RenManagerApp.ENV:
+            self.console.log("请先退出环境", style="yellow3")
+            return
+        
         env = arg.name
         if env not in self.env_dict:
             self.console.log(f"未找到环境 [bold italic cyan]{env}", style="red")
@@ -99,6 +107,10 @@ class RenManagerApp(cmd2.Cmd):
     def do_rename(self, arg):
         old_name = arg.old_name
         new_name = arg.new_name
+
+        if self.env != RenManagerApp.ENV:
+            self.console.log("请先退出环境", style="yellow3")
+            return
 
         if old_name not in self.env_dict:
             self.console.log(f"未找到环境 [bold italic cyan]{old_name} ", style="red")
@@ -161,7 +173,7 @@ class RenManagerApp(cmd2.Cmd):
                 rp = [os.path.join(self.sdk_path, "renpy.sh")]
 
             subprocess.run(rp + args, stdout=subprocess.PIPE)
-        
+
         elif arg.vscode:
             os.system(f"code {os.path.join(self.sdk_path, "renpy")}")
 
