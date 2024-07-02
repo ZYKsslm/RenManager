@@ -84,17 +84,23 @@
    deactivate
    ```
 
+7. 重置 RenManager
+   ```
+   reset
+   ```
+
 ### 环境操作
 
 1. 调用 Ren'Py
    ```
-   Usage: renpy [-h] (-l | -c COMMAND)
+   Usage: renpy [-h] (-l | -vsc | -c COMMAND)
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    -l, --launcher        打开启动器
-    -c, --command COMMAND
-                            使用 Ren'Py 命令 需要使用引号包裹
+   optional arguments:
+   -h, --help            show this help message and exit
+   -l, --launcher        打开启动器
+   -vsc, --vscode        使用 vscode 打开 Ren'Py 源码目录
+   -c, --command COMMAND
+                           使用 Ren'Py 命令 需要使用引号包裹
     ```
 
 2. 检查环境文件改动
