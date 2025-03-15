@@ -30,13 +30,13 @@ class RenManagerApp(cmd2.Cmd):
         if BOOT_TEXT:
             self.console.print(BOOT_TEXT, style=BOOT_TEXT_COLOR, justify="center")
 
-        with open("./env.json", "r") as f:
+        with open(os.path.join(os.getcwd(), "env.json"), "r") as f:
             self.env_dict: dict = ujson.load(f)
 
         self.sdk_path = None
 
     def update_env(self):
-        with open("./env.json", "w") as f:
+        with open(os.path.join(os.getcwd(), "env.json"), "w") as f:
             ujson.dump(self.env_dict, f, sort_keys=True, indent=4)
 
     @property
