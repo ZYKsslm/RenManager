@@ -4,7 +4,6 @@
 import os
 import sys
 import shutil
-import subprocess
 
 import cmd2
 import ujson
@@ -53,7 +52,7 @@ class RenManagerApp(cmd2.Cmd):
         else:
             self.sdk_path = os.path.normpath(os.path.join(os.getcwd(), "env", self.env, f"renpy-{self.env_dict[self.env]['version']}-sdk"))
 
-    @cmd2.with_argparser(Parser.create_parser())
+    @cmd2.with_argparser(Parser.create_parser()) # type: ignore
     def do_create(self, arg):
         if self.env != RenManagerApp.ENV:
             self.console.log("请先退出环境", style="yellow3")
@@ -83,7 +82,7 @@ class RenManagerApp(cmd2.Cmd):
             self.update_env()
             self.console.log(f"已成功创建环境 [bold italic cyan]{env_name}", style="green")
 
-    @cmd2.with_argparser(Parser.remove_parser())
+    @cmd2.with_argparser(Parser.remove_parser()) # type: ignore
     def do_remove(self, arg):
         if self.env != RenManagerApp.ENV:
             self.console.log("请先退出环境", style="yellow3")
@@ -103,7 +102,7 @@ class RenManagerApp(cmd2.Cmd):
         else:
             self.console.log("已取消操作", style="yellow3")
 
-    @cmd2.with_argparser(Parser.rename_parser())
+    @cmd2.with_argparser(Parser.rename_parser()) # type: ignore
     def do_rename(self, arg):
         if self.env != RenManagerApp.ENV:
             self.console.log("请先退出环境", style="yellow3")
@@ -137,7 +136,7 @@ class RenManagerApp(cmd2.Cmd):
         else:
             self.console.log("已取消操作", style="yellow3")
 
-    @cmd2.with_argparser(Parser.info_parser())
+    @cmd2.with_argparser(Parser.info_parser()) # type: ignore
     def do_info(self, arg):
         if arg.env_dict:
             if self.env:
@@ -146,7 +145,7 @@ class RenManagerApp(cmd2.Cmd):
         elif arg.version:
             self.console.print(f"当前版本为 [italic underline blue]{RenManagerApp.VERSION}", style="yellow3")
 
-    @cmd2.with_argparser(Parser.activate_parser())
+    @cmd2.with_argparser(Parser.activate_parser()) # type: ignore
     def do_activate(self, arg):
         env_name = arg.name
         if env_name in self.env_dict:
@@ -157,29 +156,35 @@ class RenManagerApp(cmd2.Cmd):
     def do_deactivate(self, arg):
         self.env = RenManagerApp.ENV
 
-    @cmd2.with_argparser(Parser.renpy_parser())
+    @cmd2.with_argparser(Parser.renpy_parser()) # type: ignore
     def do_renpy(self, arg):
         if self.env == RenManagerApp.ENV:
             self.console.log("当前未激活任何环境", style="yellow3")
             return
 
         if arg.launcher:
-            launcher_path = os.path.join(self.sdk_path, "renpy.exe")
-            os.startfile(launcher_path)
+            if sys.platform.startswith("win"):
+                launcher_path = os.path.join(self.sdk_path, "renpy.exe") # type: ignore
+                os.startfile(launcher_path)
+            else:
+                self.console.log("暂不支持该平台", style="yellow3")
+                return
 
         elif arg.command:
             args = arg.command.split(" ")
             if sys.platform.startswith("win"):
-                renpy = os.path.join(self.sdk_path, "renpy.py")
-                python_interpreter = os.path.join(self.sdk_path, "lib", "py3-windows-x86_64", "python.exe")
+                renpy = os.path.join(self.sdk_path, "renpy.py") # type: ignore
+                python_interpreter = os.path.join(self.sdk_path, "lib", "py3-windows-x86_64", "python.exe") # type: ignore
                 rp = [python_interpreter, renpy]
             else:
-                rp = [os.path.join(self.sdk_path, "renpy.sh")]
-
-            subprocess.run(rp + args, stdout=subprocess.PIPE)
+                self.console.log("暂不支持该平台", style="yellow3")
+                return
+            
+            self.console.log(f"运行命令 [bold italic cyan]{' '.join(rp + args)}[/bold italic cyan]", style="cyan")
+            os.system(' '.join(rp + args))
 
         elif arg.vscode:
-            os.system(f"code {os.path.join(self.sdk_path, "renpy")}")
+            os.system(f"code {os.path.join(self.sdk_path, 'renpy')}") # type: ignore
 
     def do_check(self, arg):
         if self.env == RenManagerApp.ENV:
@@ -203,7 +208,7 @@ class RenManagerApp(cmd2.Cmd):
             self.console.log("当前未激活任何环境", style="yellow3")
             return
 
-        doc_path = os.path.join(self.sdk_path, "doc", "index.html")
+        doc_path = os.path.join(self.sdk_path, "doc", "index.html") # type: ignore
         os.startfile(doc_path)
 
     def do_ignore(self, arg):

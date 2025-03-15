@@ -58,7 +58,7 @@ class Render:
 
     @staticmethod
     def parse_pre_version_table(text):
-        etree = html.etree.HTML(text)
+        etree = html.etree.HTML(text, "lxml")
         tr = etree.xpath(f'/html/body/div/table/tr')
         table = []
         for i in range(0, len(tr), 4):
@@ -163,20 +163,21 @@ class Checker:
     def check(self):
         difference = []
         new = []
-        sdk_path = f"./env/{self.name}"
+        sdk_path = os.path.join("env", self.name)
+        sdk_abs_path = os.path.join(os.getcwd(), sdk_path)
         with self.console.status("[yellow3]开始检测环境文件"):
-            for base_path, folders, files in os.walk(sdk_path):
+            for base_path, _, files in os.walk(sdk_abs_path):
                 for file in files:
                     path = os.path.normpath(os.path.join(base_path, file))
                     if path in self.hash_data:
-                        hash_data, size = Checker.gen_hash_data(path)
+                        hash_data, _ = Checker.gen_hash_data(path)
                         origin_data = self.hash_data.pop(path)
                         if hash_data != origin_data:
-                            difference.append(path.replace(f"env\\{self.name}\\", ""))
+                            difference.append(path.replace(sdk_path, ""))
                     else:
-                        new.append(path.replace(f"env\\{self.name}\\", ""))
+                        new.append(path.replace(sdk_path, ""))
 
-            lack = [f.replace(f"env\\{self.name}\\", "") for f in self.hash_data.keys()]
+            lack = [f.replace(sdk_path, "") for f in self.hash_data.keys()]
 
         return difference, lack, new
 
@@ -189,7 +190,7 @@ class Installer:
         self.version = version
         self.pre_release = pre_release
 
-        self.env_path = f"./env/{self.name}"
+        self.env_path = os.path.join(os.getcwd(), "env", self.name)
         self.client = httpx.Client(headers=HEADERS, timeout=5)
 
         self.package_size = None
@@ -209,7 +210,7 @@ class Installer:
         return True
 
     def extract(self, zip_name):
-        zip_path = f"{self.env_path}/{zip_name}"
+        zip_path = os.path.join(self.env_path, zip_name)
         zip_file = zipfile.ZipFile(zip_path)
         file_info_list = zip_file.infolist()
         self.package_size = sum(file_info.file_size for file_info in file_info_list)
@@ -267,8 +268,7 @@ class Installer:
             else:
                 return self.get_package_info(release_ver_url)
         else:
-            self.console.log("未指定 [bold italic cyan]Ren'Py SDK[/bold italic cyan] 版本 开始获取最新发布版本......",
-                             style="yellow3")
+            self.console.log("未指定 [bold italic cyan]Ren'Py SDK[/bold italic cyan] 版本 开始获取最新发布版本......", style="yellow3")
             resp = self.req(latest_ver_url)
             if not resp:
                 return False
@@ -292,7 +292,7 @@ class Installer:
                 return self.get_package_info(release_ver_url)
 
     def download(self, package_name, package_size, package_url):
-        package_path = f"{self.env_path}/{package_name}"
+        package_path = os.path.join(self.env_path, package_name)
         if not os.path.exists(self.env_path):
             os.makedirs(self.env_path)
 
@@ -309,14 +309,13 @@ class Installer:
         self.console.log(f"[bold italic cyan]{package_name}[/bold italic cyan] 下载完成", style="green")
 
     def hash(self):
-        sdk_path = f"./env/{self.name}"
         progress = Render.render_progress("生成哈希值")
         hash_task = progress.add_task("生成哈希值", total=self.package_size)
         data = {}
 
         self.console.log("开始为文件生成哈希值", style="yellow3")
         with progress:
-            for base_path, folders, files in os.walk(sdk_path):
+            for base_path, _, files in os.walk(self.env_path):
                 for file in files:
                     path = os.path.normpath(os.path.join(base_path, file))
                     hash_data, size = Checker.gen_hash_data(path)
