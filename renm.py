@@ -235,7 +235,7 @@ class RenManagerApp(cmd2.Cmd):
         if res and self.console.input("[bold red]请输入 [italic]RenManager[/italic] 来继续：\n[/bold red]") == "RenManager":
             for env in self.env_dict.keys():
                 shutil.rmtree(f"./env/{env}")
-                del self.env_dict[env]
+            self.env_dict = {}
             self.update_env()
             self.console.log("已重置", style="green")
         else:
