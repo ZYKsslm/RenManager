@@ -33,7 +33,7 @@ class RenManagerApp(cmd2.Cmd):
         with open(os.path.join(os.getcwd(), "env.json"), "r") as f:
             self.env_dict: dict = ujson.load(f)
 
-        self.sdk_path = None
+        self.sdk_path = ""
 
     def update_env(self):
         with open(os.path.join(os.getcwd(), "env.json"), "w") as f:
@@ -48,7 +48,7 @@ class RenManagerApp(cmd2.Cmd):
         self._env = value
         self.prompt = ENV_STYLE + f"({self._env}) " + PMT_STYLE + RenManagerApp.PROMPT
         if value == RenManagerApp.ENV:
-            self.sdk_path = None
+            self.sdk_path = ""
         else:
             self.sdk_path = os.path.normpath(os.path.join(os.getcwd(), "env", self.env, f"renpy-{self.env_dict[self.env]['version']}-sdk"))
 
@@ -164,7 +164,7 @@ class RenManagerApp(cmd2.Cmd):
 
         if arg.launcher:
             if sys.platform.startswith("win"):
-                launcher_path = os.path.join(self.sdk_path, "renpy.exe") # type: ignore
+                launcher_path = os.path.join(self.sdk_path, "renpy.exe")
                 os.startfile(launcher_path)
             else:
                 self.console.log("暂不支持该平台", style="yellow3")
@@ -173,8 +173,8 @@ class RenManagerApp(cmd2.Cmd):
         elif arg.command:
             args = arg.command.split(" ")
             if sys.platform.startswith("win"):
-                renpy = os.path.join(self.sdk_path, "renpy.py") # type: ignore
-                python_interpreter = os.path.join(self.sdk_path, "lib", "py3-windows-x86_64", "python.exe") # type: ignore
+                renpy = os.path.join(self.sdk_path, "renpy.py")
+                python_interpreter = os.path.join(self.sdk_path, "lib", "py3-windows-x86_64", "python.exe")
                 rp = [python_interpreter, renpy]
             else:
                 self.console.log("暂不支持该平台", style="yellow3")
@@ -184,7 +184,7 @@ class RenManagerApp(cmd2.Cmd):
             os.system(' '.join(rp + args))
 
         elif arg.vscode:
-            os.system(f"code {os.path.join(self.sdk_path, 'renpy')}") # type: ignore
+            os.system(f"code {os.path.join(self.sdk_path, 'renpy')}")
 
     def do_check(self, arg):
         if self.env == RenManagerApp.ENV:
@@ -208,8 +208,16 @@ class RenManagerApp(cmd2.Cmd):
             self.console.log("当前未激活任何环境", style="yellow3")
             return
 
-        doc_path = os.path.join(self.sdk_path, "doc", "index.html") # type: ignore
+        doc_path = os.path.join(self.sdk_path, "doc", "index.html")
         os.startfile(doc_path)
+
+    def do_dir(self, arg):
+        if self.env == RenManagerApp.ENV:
+            self.console.log("当前未激活任何环境", style="yellow3")
+            return
+
+        dir_path = os.path.join(self.sdk_path)
+        os.startfile(dir_path)
 
     def do_ignore(self, arg):
         if self.env == RenManagerApp.ENV:
@@ -240,6 +248,9 @@ class RenManagerApp(cmd2.Cmd):
             self.console.log("已重置", style="green")
         else:
             self.console.log("已取消操作", style="yellow3")
+
+    def do_cls(self, arg):
+        self.console.clear()
 
 
 if __name__ == '__main__':
