@@ -119,6 +119,11 @@
     doc
     ```
 
+5. 打开 Ren'Py 目录
+   ```
+   dir
+   ```
+
 ---
 
 :heart: 感谢[@llfseik](https://github.com/llfseik)帮忙制作的程序图标
